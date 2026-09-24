@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#034EE8">
+<meta name="color-scheme" content="light">
+<title>Datos de envío | NuevoDePaquete</title>
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --azul:#034EE8; --azul-900:#0A2A7A; --amarillo:#FAC200; --amarillo-600:#D9A800;
+    --tinta:#0B1B3F; --gris:#56627F; --fondo:#EEF3FF; --linea:#D3DCF3; --campo:#F8FAFF;
+    --error:#C62828; --error-bg:#FFF2F1; --wa:#1FAF55; --wa-600:#168A42;
+    --titulos:'Montserrat', 'Arial Black', Arial, sans-serif;
+    --texto:'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--fondo);color:var(--tinta);font-family:var(--texto);font-size:16px;line-height:1.45;
+       padding-bottom:env(safe-area-inset-bottom,0px)}
+  [hidden]{display:none !important}
+
+  .banner-prueba{background:var(--error);color:#fff;text-align:center;font-weight:700;font-size:14px;padding:8px 12px;
+       padding-top:calc(8px + env(safe-area-inset-top,0px))}
+
+  /* ---------- Encabezado ---------- */
+  .hero{background:var(--azul);color:#fff;position:relative;overflow:hidden;
+        padding:calc(14px + env(safe-area-inset-top,0px)) 20px 78px;
+        clip-path:polygon(0 0,100% 0,100% calc(100% - 34px),0 100%)}
+  .hero-in{max-width:560px;margin:0 auto;position:relative}
+  .logo{width:92px;height:92px;display:block;margin-left:-8px}
+  .logo-texto{font:900 20px/0.95 var(--titulos);letter-spacing:-.01em;margin:10px 0 6px}
+  .logo-texto span{display:block;color:var(--amarillo)}
+  .hero h1{font:900 clamp(36px,11vw,56px)/0.92 var(--titulos);letter-spacing:-.025em;margin:6px 0 0;text-transform:uppercase;max-width:9ch}
+  .swoosh{display:block;width:170px;height:20px;margin:10px 0 14px}
+  .rayos{position:absolute;right:4px;top:66px;width:54px;height:54px}
+  .hero p{margin:0;max-width:36ch;color:#DDE7FF;font-size:16px}
+
+  /* ---------- Formulario ---------- */
+  main{max-width:560px;margin:-40px auto 0;padding:0 14px 44px;position:relative}
+  .paso{background:#fff;border-radius:20px;padding:20px 18px 22px;margin-bottom:14px;
+        box-shadow:0 1px 0 var(--linea),0 10px 26px -18px rgba(3,78,232,.45)}
+  .paso-cab{display:flex;gap:12px;align-items:flex-start}
+  .num{flex:none;width:36px;height:36px;border-radius:11px;background:var(--amarillo);color:var(--azul-900);
+       font:900 18px/1 var(--titulos);display:grid;place-items:center}
+  .paso h2{font:800 20px/1.15 var(--titulos);margin:5px 0 3px;color:var(--azul-900);letter-spacing:-.01em}
+  .paso-cab p{margin:0;color:var(--gris);font-size:14px}
+
+  .campo{margin-top:16px}
+  .et{display:block;font-weight:700;font-size:15px;margin-bottom:6px}
+  .ayuda{display:block;font-weight:500;font-size:13px;color:var(--gris);margin-top:1px}
+  input[type=text],input[type=tel],input[type=email],input[type=number],select,textarea{
+    width:100%;font:500 16px/1.35 var(--texto);color:var(--tinta);background:var(--campo);
+    border:1.5px solid var(--linea);border-radius:12px;padding:12px 14px;min-height:50px;
+    -webkit-appearance:none;appearance:none;transition:border-color .15s,background-color .15s}
+  textarea{min-height:112px;resize:vertical}
+  select{padding-right:40px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%23034EE8' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+         background-repeat:no-repeat;background-position:right 14px center}
+  select:invalid{color:#8A94AE}
+  ::placeholder{color:#8A94AE;opacity:1}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--azul);background:#fff;box-shadow:0 0 0 4px rgba(3,78,232,.14)}
+  .ced{display:grid;grid-template-columns:78px 1fr;gap:8px}
+
+  .chips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .chip{position:relative;display:block;cursor:pointer}
+  .chip input{position:absolute;opacity:0;width:1px;height:1px}
+  .chip span{display:flex;align-items:center;justify-content:center;min-height:54px;padding:8px;text-align:center;
+             border:1.5px solid var(--linea);border-radius:12px;background:var(--campo);font:800 16px var(--titulos);
+             color:var(--azul-900);transition:background-color .15s,border-color .15s}
+  .chip input:checked + span{background:var(--azul);border-color:var(--azul);color:#fff;box-shadow:inset 0 -5px 0 var(--amarillo)}
+  .chip input:focus-visible + span{box-shadow:0 0 0 4px rgba(250,194,0,.55)}
+
+  .opciones{display:grid;gap:8px}
+  .opcion{position:relative;display:block;cursor:pointer}
+  .opcion input{position:absolute;opacity:0;width:1px;height:1px}
+  .opcion > span{display:grid;grid-template-columns:22px 1fr;gap:4px 12px;align-items:start;padding:14px;
+                 border:1.5px solid var(--linea);border-radius:14px;background:var(--campo)}
+  .opcion .punto{grid-row:span 2;width:22px;height:22px;border-radius:50%;border:2px solid #9AA6C4;margin-top:1px;background:#fff}
+  .opcion b{font:800 16px/1.2 var(--titulos);color:var(--azul-900)}
+  .opcion small{font-size:14px;color:var(--gris)}
+  .opcion input:checked + span{border-color:var(--azul);background:#fff;box-shadow:0 0 0 3px rgba(3,78,232,.12)}
+  .opcion input:checked + span .punto{border:7px solid var(--azul)}
+  .opcion input:focus-visible + span{box-shadow:0 0 0 4px rgba(250,194,0,.55)}
+
+  .cond{border-top:1.5px dashed var(--linea);margin-top:18px;padding-top:2px}
+  @media (min-width:520px){ .dos{display:grid;grid-template-columns:1fr 1fr;gap:0 12px} }
+
+  .msg-error{display:none;margin:7px 0 0;color:var(--error);font-size:13.5px;font-weight:600}
+  .campo.invalido .msg-error{display:block}
+  .campo.invalido input,.campo.invalido select,.campo.invalido textarea{border-color:var(--error);background:var(--error-bg)}
+  .campo.invalido .chip span,.campo.invalido .opcion > span{border-color:var(--error)}
+
+  .hp{position:absolute !important;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
+
+  /* ---------- Botones ---------- */
+  .btn{width:100%;border:0;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:10px;
+       font:900 18px/1.1 var(--titulos);letter-spacing:.005em;cursor:pointer;text-decoration:none;
+       -webkit-tap-highlight-color:transparent;transition:transform .08s,box-shadow .08s}
+  .btn-principal{min-height:60px;background:var(--amarillo);color:var(--azul-900);box-shadow:0 5px 0 var(--amarillo-600)}
+  .btn-principal:active:not([disabled]){transform:translateY(3px);box-shadow:0 2px 0 var(--amarillo-600)}
+  .btn[disabled]{cursor:progress;opacity:.8}
+  .btn:focus-visible{outline:3px solid var(--azul);outline-offset:3px}
+  .spinner{display:none;flex:none;width:20px;height:20px;border:3px solid currentColor;border-right-color:transparent;border-radius:50%;animation:gira .7s linear infinite}
+  .cargando .spinner{display:inline-block}
+  @keyframes gira{to{transform:rotate(360deg)}}
+  .nota{font-size:14px;color:var(--gris);text-align:center;margin:14px 6px 0}
+  .nota b{color:var(--tinta)}
+
+  /* ---------- Paso final ---------- */
+  .final{background:#fff;border-radius:20px;padding:24px 18px 22px;box-shadow:0 1px 0 var(--linea),0 10px 26px -18px rgba(3,78,232,.45)}
+  .etiqueta-roja{display:inline-block;background:var(--error);color:#fff;font:800 13px var(--titulos);padding:6px 11px;border-radius:999px}
+  .final h2{font:900 26px/1.05 var(--titulos);color:var(--azul-900);margin:12px 0 10px;letter-spacing:-.015em}
+  .alerta{display:flex;gap:12px;align-items:flex-start;background:#FFF6D1;border:2px solid var(--amarillo);border-radius:14px;
+          padding:14px;font-weight:700;font-size:16px;margin:0 0 14px}
+  .alerta svg{flex:none;margin-top:1px}
+  .final p{margin:0 0 16px;color:#2B3858}
+  .btn-wa{min-height:66px;background:var(--wa);color:#fff;box-shadow:0 5px 0 var(--wa-600);font-size:19px}
+  .btn-wa:active{transform:translateY(3px);box-shadow:0 2px 0 var(--wa-600)}
+  .gracias{margin-top:18px;border-radius:14px;background:#EAF8EF;border:1.5px solid #9FDDB6;padding:16px}
+  .gracias h3{font:800 19px var(--titulos);margin:0 0 6px;color:#0F5A2C}
+  .gracias p{margin:0 0 12px;color:#1D4A30}
+  .btn-sec{min-height:52px;background:#fff;color:var(--azul);border:2px solid var(--azul);font-size:16px}
+  details{margin-top:16px;border-top:1.5px solid var(--linea);padding-top:12px}
+  summary{cursor:pointer;font-weight:700;color:var(--azul)}
+  details pre{white-space:pre-wrap;word-break:break-word;font:14px/1.5 var(--texto);background:var(--campo);border-radius:12px;padding:12px;margin:10px 0 0}
+
+  /* ---------- Mini modal ---------- */
+  .modal-fondo{position:fixed;inset:0;z-index:50;background:rgba(6,22,64,.58);display:grid;place-items:center;
+               padding:calc(20px + env(safe-area-inset-top,0px)) 18px calc(20px + env(safe-area-inset-bottom,0px))}
+  .modal{width:100%;max-width:410px;max-height:100%;overflow:auto;background:#fff;border-radius:20px;padding:22px 20px 18px;
+         border-top:7px solid var(--error);animation:entra .18s ease-out}
+  .modal.aviso{border-top-color:var(--amarillo)}
+  .modal.ok{border-top-color:var(--azul)}
+  .modal-cab{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+  .modal-ico{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font:900 20px var(--titulos);color:#fff;background:var(--error)}
+  .modal.aviso .modal-ico{background:var(--amarillo);color:var(--azul-900)}
+  .modal.ok .modal-ico{background:var(--azul)}
+  .modal h3{margin:0;font:800 19px/1.2 var(--titulos);color:var(--tinta)}
+  .modal-cuerpo{font-size:15.5px;color:#2B3858}
+  .modal-cuerpo p{margin:0 0 10px}
+  .modal-cuerpo ul{margin:0 0 10px;padding-left:18px}
+  .modal-cuerpo li{margin-bottom:7px}
+  .modal .btn{margin-top:8px;min-height:52px;background:var(--azul);color:#fff;font-size:17px}
+  @keyframes entra{from{transform:translateY(8px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.001s !important;transition:none !important}}
+</style>
+</head>
+<body>
+
+<div id="bannerPrueba" class="banner-prueba" hidden>MODO PRUEBA activo: no se envía nada, solo se descargan las etiquetas. Cámbialo a false antes de publicar.</div>
+
+<header class="hero">
+  <div class="hero-in">
+    <img id="logoHeader" class="logo" src="logo.png" alt="NuevoDePaquete" width="92" height="92">
+    <div id="logoTexto" class="logo-texto" hidden>NUEVO DE<span>PAQUETE</span></div>
+    <svg class="rayos" viewBox="0 0 54 54" aria-hidden="true"><g stroke="#FAC200" stroke-width="6" stroke-linecap="round"><path d="M8 30 L20 34"/><path d="M14 12 L24 24"/><path d="M34 5 L34 19"/></g></svg>
+    <h1 id="heroTitulo">Datos para tu envío</h1>
+    <svg class="swoosh" viewBox="0 0 170 20" aria-hidden="true"><path d="M4 15 C 50 3, 115 1, 166 9" stroke="#FAC200" stroke-width="6" fill="none" stroke-linecap="round"/></svg>
+    <p id="heroTexto">Completa este formulario para recibir tu compra: entrega directa en Maracay o envío por agencia a toda Venezuela.</p>
+  </div>
+</header>
+
+<main>
+  <form id="formPedido" novalidate autocomplete="on">
+
+    <!-- Honeypot contra bots: las personas no lo ven -->
+    <div class="hp" aria-hidden="true">
+      <label for="sitioWeb">No llenar este campo</label>
+      <input type="text" id="sitioWeb" name="sitio_web" tabindex="-1" autocomplete="off">
+    </div>
+
+    <section class="paso" aria-labelledby="t1">
+      <div class="paso-cab"><span class="num">1</span>
+        <div><h2 id="t1">¿Qué compraste?</h2><p>Así la tienda identifica y prepara tu paquete.</p></div>
+      </div>
+      <div class="campo">
+        <label class="et" for="productos">Productos <span class="ayuda">Si son varios, escribe uno por línea con su cantidad.</span></label>
+        <textarea id="productos" name="productos" placeholder="Escribe los productos que compraste&#10;Ej.: 1 Mini UPS Roccia 14.000 mAh" maxlength="2000"></textarea>
+        <p class="msg-error"></p>
+      </div>
+    </section>
+
+    <section class="paso" aria-labelledby="t2">
+      <div class="paso-cab"><span class="num">2</span>
+        <div><h2 id="t2">Tus datos</h2><p>La agencia los usa para identificar a quien recibe.</p></div>
+      </div>
+      <div class="campo">
+        <label class="et" for="nombre">Nombre completo</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Nombre y apellido, como en tu cédula" autocomplete="name" maxlength="80">
+        <p class="msg-error"></p>
+      </div>
+      <div class="campo">
+        <label class="et" for="cedNum">Cédula</label>
+        <div class="ced">
+          <select id="cedTipo" name="cedTipo" aria-label="Tipo de cédula">
+            <option value="V">V</option>
+            <option value="E">E</option>
+          </select>
+          <input type="text" id="cedNum" name="cedNum" inputmode="numeric" placeholder="Solo números" maxlength="9" autocomplete="off">
+        </div>
+        <p class="msg-error"></p>
+      </div>
+      <div class="dos">
+        <div class="campo">
+          <label class="et" for="telefono">Teléfono</label>
+          <input type="tel" id="telefono" name="telefono" inputmode="numeric" placeholder="0414-1234567" autocomplete="tel" maxlength="12">
+          <p class="msg-error"></p>
+        </div>
+        <div class="campo">
+          <label class="et" for="correo">Correo</label>
+          <input type="email" id="correo" name="correo" inputmode="email" placeholder="tucorreo@gmail.com" autocomplete="email" maxlength="100">
+          <p class="msg-error"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="paso" aria-labelledby="t3">
+      <div class="paso-cab"><span class="num">3</span>
+        <div><h2 id="t3">Entrega</h2><p>Elige primero dónde vas a recibir tu pedido.</p></div>
+      </div>
+
+      <div class="campo" id="grupoModalidad">
+        <span class="et" id="etModalidad">¿Dónde recibes tu pedido?</span>
+        <div class="opciones" role="radiogroup" aria-labelledby="etModalidad">
+          <label class="opcion"><input type="radio" name="modalidad" value="maracay">
+            <span><i class="punto"></i><b>Maracay: Entrega directa</b><small>Te llevamos el pedido directo a tu dirección en Maracay.</small></span></label>
+          <label class="opcion"><input type="radio" name="modalidad" value="nacional">
+            <span><i class="punto"></i><b>Envío a nivel nacional</b><small>Por MRW o Zoom. Retiras en la oficina de la agencia que elijas.</small></span></label>
+        </div>
+        <p class="msg-error"></p>
+      </div>
+
+      <div class="cond" id="bloqueMaracay" hidden>
+        <div class="campo">
+          <label class="et" for="direccion">Dirección exacta en Maracay <span class="ayuda">Urbanización o sector, calle, casa o edificio, piso y número.</span></label>
+          <textarea id="direccion" name="direccion" placeholder="Ej.: Urb. La Soledad, calle 3, casa 14-B" maxlength="300" style="min-height:84px"></textarea>
+          <p class="msg-error"></p>
+        </div>
+        <div class="campo">
+          <label class="et" for="referencia">Punto de referencia</label>
+          <input type="text" id="referencia" name="referencia" placeholder="Ej.: Frente a la plaza, portón negro" maxlength="200">
+          <p class="msg-error"></p>
+        </div>
+      </div>
+
+      <div class="cond" id="bloqueNacional" hidden>
+        <div class="campo" id="grupoAgencia">
+          <span class="et" id="etAgencia">Agencia</span>
+          <div class="chips" role="radiogroup" aria-labelledby="etAgencia">
+            <label class="chip"><input type="radio" name="agencia" value="MRW"><span>MRW</span></label>
+            <label class="chip"><input type="radio" name="agencia" value="Zoom"><span>Zoom</span></label>
+          </div>
+          <p class="msg-error"></p>
+        </div>
+        <div class="campo">
+          <label class="et" for="estado">Estado</label>
+          <select id="estado" name="estado" required>
+            <option value="" disabled selected>Selecciona tu estado</option>
+          </select>
+          <p class="msg-error"></p>
+        </div>
+        <div class="campo">
+          <label class="et" for="ciudad">Ciudad</label>
+          <input type="text" id="ciudad" name="ciudad" placeholder="Ej.: Barquisimeto" autocomplete="address-level2" maxlength="60">
+          <p class="msg-error"></p>
+        </div>
+        <div class="campo">
+          <label class="et" for="oficina">Dirección exacta de la oficina <span class="ayuda" id="ayudaOficina">Dirección de la oficina de la agencia donde vas a retirar.</span></label>
+          <textarea id="oficina" name="oficina" placeholder="Ej.: Av. Lara con calle 60, C.C. Churun Meru, local 12" maxlength="300" style="min-height:84px"></textarea>
+          <p class="msg-error"></p>
+        </div>
+      </div>
+    </section>
+
+    <button type="submit" id="btnEnviar" class="btn btn-principal"><span class="spinner" aria-hidden="true"></span><span class="txt">Enviar pedido</span></button>
+    <p class="nota">Después de enviar, <b>tendrás que avisar por WhatsApp</b> para que tu pedido sea procesado.</p>
+  </form>
+
+  <section id="pasoFinal" class="final" hidden aria-labelledby="tFinal">
+    <span class="etiqueta-roja">Falta 1 paso</span>
+    <h2 id="tFinal">Paso final obligatorio</h2>
+    <div class="alerta" role="alert">
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 1 21h22L12 2z" fill="#FAC200"/><path d="M12 9v5" stroke="#0A2A7A" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="17.5" r="1.4" fill="#0A2A7A"/></svg>
+      <span>Tu pedido NO será procesado hasta que envíes el aviso por WhatsApp.</span>
+    </div>
+    <p>Tus datos ya llegaron a la tienda. Toca el botón: se abrirá WhatsApp con tu pedido ya escrito y solo tienes que darle a <b>enviar</b>.</p>
+    <a id="btnWhatsApp" class="btn btn-wa" href="#" target="_blank" rel="noopener">
+      <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4v-4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="#fff"/><path d="M7 9h10M7 13h6" stroke="#1FAF55" stroke-width="2" stroke-linecap="round"/></svg>
+      <span class="txt">Enviar aviso por WhatsApp</span>
+    </a>
+
+    <div id="gracias" class="gracias" hidden role="status">
+      <h3>¡Gracias, <span id="graciasNombre"></span>!</h3>
+      <p>Con tu aviso por WhatsApp tu pedido queda en proceso. Si WhatsApp no se abrió o no alcanzaste a enviar el mensaje, toca el botón verde otra vez.</p>
+      <button type="button" id="btnNuevo" class="btn btn-sec">Registrar otro envío</button>
+    </div>
+
+    <details>
+      <summary>Ver el resumen de tu pedido</summary>
+      <pre id="resumenPedido"></pre>
+    </details>
+  </section>
+</main>
+
+<!-- Mini modal (avisos, errores y confirmaciones) -->
+<div id="modalFondo" class="modal-fondo" hidden>
+  <div id="modalCaja" class="modal" role="alertdialog" aria-modal="true" aria-labelledby="modalTitulo" aria-describedby="modalCuerpo">
+    <div class="modal-cab"><span id="modalIco" class="modal-ico" aria-hidden="true">!</span><h3 id="modalTitulo"></h3></div>
+    <div id="modalCuerpo" class="modal-cuerpo"></div>
+    <button type="button" id="modalBtn" class="btn">Entendido</button>
+  </div>
+</div>
+
+<script>
+/* ==================== CONFIGURACIÓN (completa estos valores) ==================== */
+const URL_WEBAPP      = "https://script.google.com/macros/s/AKfycbyLXvUlPZ6yg2TfPPiJ9IihZ6oQWSr5OgXOtAmHRjZ7YgydZcbER3fApTYt_srOg0hgMA/exec";      // URL del Web App de Apps Script (termina en /exec)
+const WHATSAPP_TIENDA = "584143437757";         // Formato internacional sin +, ej. 58412XXXXXXX
+const LOGO_WEB        = "logo.png";              // Logo a color del encabezado
+const LOGO_ETIQUETA   = "logo_etiqueta.png";     // OPCIONAL: logo PNG con fondo transparente para la etiqueta
+const DISTANCIA_FONDO = 60;    // Logo con fondo azul: qué tan distinto del fondo debe ser un píxel para salir negro (subir = menos negro)
+const UMBRAL_LOGO     = 160;   // Logo transparente: luminosidad por debajo de la cual el píxel sale negro
+const MODO_PRUEBA     = false; // true = no envía nada; descarga las 2 etiquetas y muestra el paso final
+const TIEMPO_MAX_ENVIO_MS = 60000;
+const REMITENTE = { nombre:"NUEVO DE PAQUETE, C.A.", rif:"J-50870250-6", telefono:"0414-3437757" };  // Va primero en la etiqueta
+/* =============================================================================== */
+
+const TIENDA = "NuevoDePaquete";
+const CLAVE_PENDIENTE = "ndp_aviso_whatsapp_pendiente";
+const ESTADOS = ["Amazonas","Anzoátegui","Apure","Aragua","Barinas","Bolívar","Carabobo","Cojedes","Delta Amacuro",
+  "Distrito Capital","Falcón","Guárico","La Guaira","Lara","Mérida","Miranda","Monagas","Nueva Esparta","Portuguesa",
+  "Sucre","Táchira","Trujillo","Yaracuy","Zulia"];
+const ETIQUETAS = { productos:"Productos", nombre:"Nombre completo", cedNum:"Cédula", telefono:"Teléfono", correo:"Correo",
+  grupoModalidad:"Dónde recibes", direccion:"Dirección exacta", referencia:"Punto de referencia",
+  grupoAgencia:"Agencia", estado:"Estado", ciudad:"Ciudad", oficina:"Dirección de la oficina" };
+
+const $ = id => document.getElementById(id);
+const form = $("formPedido");
+let enviando = false;
+let intento = null;            // {id, sello}: se reutiliza en reintentos mientras el formulario no cambie
+let logoMonoCache = null;
+
+/* ---------------- Utilidades ---------------- */
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
+function radio(nombre){ const r = form.querySelector('input[name="'+nombre+'"]:checked'); return r ? r.value : ""; }
+function configurado(v){ return v && v.indexOf("[") === -1; }
+function nuevoId(){
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 12);
+}
+function selloCaracas(){
+  const partes = new Intl.DateTimeFormat("en-GB", { timeZone:"America/Caracas", year:"numeric", month:"2-digit",
+    day:"2-digit", hour:"2-digit", minute:"2-digit", hourCycle:"h23" }).formatToParts(new Date());
+  const g = t => partes.find(p => p.type === t).value;
+  return { legible: `${g("day")}/${g("month")}/${g("year")} ${g("hour")}:${g("minute")}`,
+           archivo: `${g("year")}${g("month")}${g("day")}-${g("hour")}${g("minute")}` };
+}
+function nombreArchivo(nombre, sello, papel){
+  const limpio = nombre.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Za-z0-9]/g, "").slice(0, 40) || "Cliente";
+  return `Etiqueta_${limpio}_${sello.archivo}_${papel}mm.pdf`;
+}
+function ocupado(btn, on, texto){
+  btn.disabled = on;
+  btn.classList.toggle("cargando", on);
+  btn.setAttribute("aria-busy", on ? "true" : "false");
+  if (texto) btn.querySelector(".txt").textContent = texto;
+}
+
+/* ---------------- Mini modal ---------------- */
+function modal({ tipo = "error", titulo, html, boton = "Entendido" }){
+  return new Promise(resolve => {
+    const fondo = $("modalFondo"), caja = $("modalCaja"), btn = $("modalBtn");
+    const previo = document.activeElement;
+    caja.className = "modal " + (tipo === "error" ? "" : tipo);
+    $("modalIco").textContent = tipo === "ok" ? "✓" : (tipo === "aviso" ? "!" : "✕");
+    $("modalTitulo").textContent = titulo;
+    $("modalCuerpo").innerHTML = html;
+    btn.textContent = boton;
+    fondo.hidden = false;
+    const tecla = e => { if (e.key === "Escape") cerrar(); };
+    function cerrar(){
+      fondo.hidden = true; btn.onclick = null; document.removeEventListener("keydown", tecla);
+      if (previo && previo.focus) try { previo.focus({ preventScroll:true }); } catch(e){}
+      resolve();
+    }
+    btn.onclick = cerrar;
+    document.addEventListener("keydown", tecla);
+    btn.focus();
+  });
+}
+
+/* ---------------- Validación ---------------- */
+function marcarError(id, msg){
+  const el = $(id);
+  const campo = el.classList.contains("campo") ? el : el.closest(".campo");
+  campo.classList.add("invalido");
+  campo.querySelector(".msg-error").textContent = msg;
+}
+function limpiarErrores(){ form.querySelectorAll(".campo.invalido").forEach(c => c.classList.remove("invalido")); }
+
+function validar(){
+  limpiarErrores();
+  const errores = [];
+  const err = (id, msg) => { errores.push([id, msg]); marcarError(id, msg); };
+  const v = id => $(id).value.trim();
+
+  if (v("productos").length < 3) err("productos", "Escribe qué productos compraste; sin eso la tienda no puede identificar tu paquete.");
+
+  const nombre = v("nombre").replace(/\s+/g, " ");
+  if (!nombre) err("nombre", "Está vacío. Escribe tu nombre y apellido.");
+  else if (nombre.split(" ").length < 2) err("nombre", "Escribe nombre y apellido, como en tu cédula: la agencia lo verifica al entregar.");
+  else if (/\d/.test(nombre)) err("nombre", "No debe llevar números. Escribe solo tu nombre y apellido.");
+
+  const ced = v("cedNum");
+  if (!ced) err("cedNum", "Está vacía. Escribe el número de tu cédula.");
+  else if (!/^\d{6,9}$/.test(ced)) err("cedNum", "Debe tener solo números, entre 6 y 9 dígitos, sin puntos ni letras.");
+
+  const tel = v("telefono");
+  if (!tel) err("telefono", "Está vacío. La agencia lo necesita para contactarte.");
+  else if (!/^04(12|14|16|22|24|26)-\d{7}$/.test(tel)) err("telefono", "Debe ser un celular venezolano con formato 04XX-XXXXXXX (0412, 0414, 0416, 0422, 0424 o 0426).");
+
+  const correo = v("correo");
+  if (!correo) err("correo", "Está vacío. Escribe tu correo electrónico.");
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(correo)) err("correo", "No parece un correo válido. Revisa que tenga la forma nombre@dominio.com.");
+
+  const modalidad = radio("modalidad");
+  if (!modalidad) err("grupoModalidad", "Elige si recibes en Maracay (entrega directa) o por envío a nivel nacional.");
+  if (modalidad === "maracay"){
+    if (v("direccion").length < 10) err("direccion", "Escribe tu dirección completa en Maracay: sector o urbanización, calle y casa o edificio. Es muy corta.");
+    if (v("referencia").length < 4) err("referencia", "Escribe un punto de referencia cercano para encontrar tu dirección.");
+  }
+  if (modalidad === "nacional"){
+    const ag = radio("agencia");
+    if (!ag) err("grupoAgencia", "Elige por cuál agencia quieres recibir: MRW o Zoom.");
+    if (!$("estado").value) err("estado", "Selecciona el estado donde está la oficina de la agencia.");
+    if (v("ciudad").length < 3) err("ciudad", "Escribe la ciudad donde está la oficina de la agencia.");
+    if (v("oficina").length < 10) err("oficina", "Escribe la dirección exacta de la oficina de " + (ag || "la agencia") + " donde vas a retirar. Es muy corta.");
+  }
+  return errores;
+}
+
+/* ---------------- Datos del pedido ---------------- */
+function recolectar(){
+  const t = id => $(id).value.trim().replace(/\s*\n\s*/g, ", ").replace(/[ \t]+/g, " ");
+  const modalidad = radio("modalidad");
+  const d = {
+    productos: $("productos").value.split("\n").map(l => l.trim().replace(/[ \t]+/g, " ")).filter(Boolean).join("\n"),
+    nombre: t("nombre"),
+    cedula: $("cedTipo").value + "-" + t("cedNum"),
+    telefono: t("telefono"),
+    correo: t("correo").toLowerCase(),
+    modalidad
+  };
+  if (modalidad === "maracay"){
+    d.modalidadTexto = "Maracay: Entrega directa";
+    d.estado = "Aragua"; d.ciudad = "Maracay";
+    d.direccion = t("direccion"); d.referencia = t("referencia");
+  } else {
+    d.modalidadTexto = "Envío a nivel nacional";
+    d.agencia = radio("agencia"); d.estado = $("estado").value; d.ciudad = t("ciudad"); d.oficina = t("oficina");
+  }
+  return d;
+}
+
+// Fuente única para el correo y el WhatsApp: el script arma el correo con ESTAS mismas filas.
+function secciones(d){
+  const envio = [["Modalidad", d.modalidadTexto]];
+  if (d.modalidad === "maracay"){
+    envio.push(["Ciudad", "Maracay (Aragua)"], ["Dirección", d.direccion], ["Referencia", d.referencia]);
+  } else {
+    envio.push(["Agencia", d.agencia], ["Estado", d.estado], ["Ciudad", d.ciudad], ["Oficina", d.oficina]);
+  }
+  return [
+    { titulo:"Productos", filas:[["Productos", d.productos]] },
+    { titulo:"Cliente",   filas:[["Nombre", d.nombre], ["Cédula", d.cedula], ["Teléfono", d.telefono], ["Correo", d.correo]] },
+    { titulo:"Envío",     filas: envio }
+  ];
+}
+
+function mensajeWhatsApp(secs, fecha){
+  const icono = { "Productos":"📦", "Cliente":"👤", "Envío":"🚚" };
+  let m = `🛒 *NUEVO PEDIDO – ${TIENDA}*\n🗓️ ${fecha}\n`;
+  secs.forEach(s => {
+    m += `\n${icono[s.titulo] || "•"} *${s.titulo.toUpperCase()}*\n`;
+    s.filas.forEach(([k, v]) => { m += (k === s.titulo ? v : `${k}: ${v}`) + "\n"; });
+  });
+  m += `\n✅ Ya llené el formulario de envío.`;
+  return m;
+}
+
+/* ---------------- Logo en blanco y negro ---------------- */
+function cargarImagen(src){
+  return new Promise((ok, falla) => { const i = new Image(); i.onload = () => ok(i); i.onerror = falla; i.src = src; });
+}
+function convertirMono(img, modo){
+  const escala = Math.min(1, 600 / Math.max(img.naturalWidth, img.naturalHeight));
+  const w = Math.round(img.naturalWidth * escala), h = Math.round(img.naturalHeight * escala);
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  const ctx = c.getContext("2d", { willReadFrequently:true });
+  ctx.drawImage(img, 0, 0, w, h);
+  const px = ctx.getImageData(0, 0, w, h).data;
+
+  let fondo = null;
+  if (modo === "fondo"){   // color de fondo = promedio de las 4 esquinas
+    const m = 4, pts = [[m,m],[w-1-m,m],[m,h-1-m],[w-1-m,h-1-m]];
+    fondo = [0,0,0];
+    pts.forEach(([x,y]) => { const i = (y*w + x) * 4; fondo[0]+=px[i]/4; fondo[1]+=px[i+1]/4; fondo[2]+=px[i+2]/4; });
+  }
+  const borde = Math.round(Math.min(w, h) * 0.02);     // ignora el filo de la imagen (ruido de JPG)
+  const negro = new Uint8Array(w * h);
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++){
+    const i = (y*w + x) * 4, r = px[i], g = px[i+1], b = px[i+2], a = px[i+3];
+    let n;
+    if (x < borde || y < borde || x >= w - borde || y >= h - borde) n = false;
+    else if (modo === "fondo") n = Math.hypot(r - fondo[0], g - fondo[1], b - fondo[2]) >= DISTANCIA_FONDO;
+    else n = a >= 128 && (0.299*r + 0.587*g + 0.114*b) < UMBRAL_LOGO;
+    if (n){ negro[y*w + x] = 1; if (x<x0) x0=x; if (x>x1) x1=x; if (y<y0) y0=y; if (y>y1) y1=y; }
+  }
+  if (x1 < 0) return false;
+  const cw = x1 - x0 + 1, ch = y1 - y0 + 1;
+  const out = document.createElement("canvas"); out.width = cw; out.height = ch;
+  const octx = out.getContext("2d");
+  const od = octx.createImageData(cw, ch);
+  for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++){
+    const v = negro[(y + y0)*w + (x + x0)] ? 0 : 255, j = (y*cw + x) * 4;
+    od.data[j] = od.data[j+1] = od.data[j+2] = v; od.data[j+3] = 255;
+  }
+  octx.putImageData(od, 0, 0);
+  return { dataUrl: out.toDataURL("image/png"), w: cw, h: ch };
+}
+async function obtenerLogoMono(){
+  if (logoMonoCache !== null) return logoMonoCache;
+  let img = null, modo = "transparente";
+  try { img = await cargarImagen(LOGO_ETIQUETA); } catch(e){}
+  if (!img){ modo = "fondo"; try { img = await cargarImagen(LOGO_WEB); } catch(e){} }
+  try { logoMonoCache = img ? convertirMono(img, modo) : false; } catch(e){ logoMonoCache = false; }
+  return logoMonoCache;
+}
+
+/* ---------------- Etiqueta PDF térmica ---------------- */
+function textoPdf(s){   // Helvetica de jsPDF solo trae Latin-1: se quitan emojis y símbolos raros
+  return String(s || "").normalize("NFC")
+    .replace(/[“”«»]/g, '"').replace(/[‘’]/g, "'").replace(/[–—]/g, "-").replace(/…/g, "...")
+    .replace(/[^\n\x20-\x7E\xA0-\xFF]/g, "").replace(/[ \t]{2,}/g, " ");
+}
+function partir(doc, texto, anchoMax){   // splitTextToSize + corte por caracteres como garantía final
+  const lineas = [];
+  String(texto).split("\n").forEach(parrafo => {
+    if (!parrafo.trim()) return;
+    doc.splitTextToSize(parrafo.trim(), anchoMax).forEach(l => {
+      if (doc.getTextWidth(l) <= anchoMax){ lineas.push(l); return; }
+      let actual = "";
+      for (const ch of l){
+        if (actual && doc.getTextWidth(actual + ch) > anchoMax){ lineas.push(actual); actual = ch; }
+        else actual += ch;
+      }
+      if (actual) lineas.push(actual);
+    });
+  });
+  return lineas.length ? lineas : [" "];
+}
+
+function dibujarEtiqueta(doc, d, cfg, logo, fecha, pintar){
+  const mm = pt => pt * 0.3528;
+  const mx = (cfg.ancho - cfg.util) / 2;
+  let y = 3;
+  const renglon = (l, pt, estilo, centrado) => {
+    doc.setFont("helvetica", estilo); doc.setFontSize(pt);
+    y += mm(pt) * 1.22;
+    if (pintar) doc.text(l, centrado ? cfg.ancho / 2 : mx, y - mm(pt) * 0.28, centrado ? { align:"center" } : undefined);
+  };
+  const texto = (s, pt, estilo = "normal", centrado = false) => {
+    doc.setFont("helvetica", estilo); doc.setFontSize(pt);
+    partir(doc, textoPdf(s), cfg.util).forEach(l => renglon(l, pt, estilo, centrado));
+  };
+  const campo = (etq, valor) => {          // "Etiqueta:" en negrita + valor normal, sin salirse del ancho
+    const pt = cfg.base, pref = etq + ": ";
+    doc.setFont("helvetica", "bold"); doc.setFontSize(pt);  const anchoNeg = doc.getTextWidth(pref);
+    doc.setFont("helvetica", "normal");                      const anchoNor = doc.getTextWidth(pref);
+    const extra = Math.max(0, anchoNeg - anchoNor);
+    partir(doc, textoPdf(pref + valor), cfg.util - extra).forEach((l, i) => {
+      y += mm(pt) * 1.22;
+      if (!pintar) return;
+      const base = y - mm(pt) * 0.28;
+      if (i === 0 && l.startsWith(pref)){
+        doc.setFont("helvetica", "bold");   doc.text(pref, mx, base);
+        doc.setFont("helvetica", "normal"); doc.text(l.slice(pref.length), mx + anchoNeg, base);
+      } else { doc.setFont("helvetica", "normal"); doc.text(l, mx, base); }
+    });
+  };
+  const recuadro = (s, pt) => {            // modalidad dentro de un recuadro con borde (sin relleno: no recalienta la térmica)
+    doc.setFont("helvetica", "bold"); doc.setFontSize(pt);
+    const lineas = partir(doc, textoPdf(s), cfg.util - 4);
+    const alto = lineas.length * mm(pt) * 1.22 + 2.4;
+    if (pintar){
+      doc.setDrawColor(0, 0, 0); doc.setLineWidth(0.5);
+      doc.roundedRect(mx, y + 0.8, cfg.util, alto, 1.2, 1.2, "S");
+      lineas.forEach((l, i) => doc.text(l, cfg.ancho / 2, y + 0.8 + 1.2 + (i + 1) * mm(pt) * 1.22 - mm(pt) * 0.28, { align:"center" }));
+    }
+    y += alto + 1.6;
+  };
+  const separador = () => { y += 1.6; if (pintar){ doc.setLineWidth(0.35); doc.line(mx, y, mx + cfg.util, y); } y += 1.2; };
+
+  if (logo){
+    let lw = cfg.logoAncho, lh = lw * logo.h / logo.w;
+    if (lh > cfg.logoAltoMax){ lh = cfg.logoAltoMax; lw = lh * logo.w / logo.h; }
+    if (pintar) doc.addImage(logo.dataUrl, "PNG", (cfg.ancho - lw) / 2, y, lw, lh);
+    y += lh + 1.5;
+  } else {
+    texto(TIENDA, cfg.grande - 2, "bold", true);
+  }
+  texto("Fecha: " + fecha, cfg.base, "normal", true);
+  separador();
+
+  texto("REMITENTE", cfg.titulo, "bold");
+  texto(REMITENTE.nombre, cfg.base + 1, "bold");
+  campo("RIF", REMITENTE.rif);
+  campo("TLF", REMITENTE.telefono);
+  separador();
+
+  texto("DESTINATARIO", cfg.titulo, "bold");
+  texto(d.nombre, cfg.grande, "bold");
+  y += 0.8;
+  campo("C.I.", d.cedula);
+  campo("Tel", d.telefono);
+  separador();
+
+  if (d.modalidad === "maracay"){
+    recuadro("ENTREGA DIRECTA - MARACAY", cfg.base + 1);
+    campo("Dirección", d.direccion);
+    campo("Referencia", d.referencia);
+  } else {
+    recuadro("ENVÍO NACIONAL - " + String(d.agencia).toUpperCase(), cfg.base + 1);
+    campo("Estado", d.estado);
+    campo("Ciudad", d.ciudad);
+    campo("Oficina", d.oficina);
+  }
+  separador();
+  texto("PRODUCTOS", cfg.titulo, "bold");
+  texto(d.productos, cfg.base);
+  return y + 5;
+}
+
+function generarEtiqueta(d, papel, logo, fecha){
+  const { jsPDF } = window.jspdf;
+  const cfg = papel === 58
+    ? { ancho:58, util:48, base:8,   titulo:7.5, grande:13, logoAncho:26, logoAltoMax:24 }
+    : { ancho:80, util:72, base:9.5, titulo:8.5, grande:16, logoAncho:34, logoAltoMax:30 };
+  const medidor = new jsPDF({ unit:"mm", format:[cfg.ancho, 2000], orientation:"portrait" });
+  const alto = Math.max(50, Math.ceil(dibujarEtiqueta(medidor, d, cfg, logo, fecha, false)));
+  const doc = new jsPDF({ unit:"mm", format:[cfg.ancho, alto], orientation: alto >= cfg.ancho ? "portrait" : "landscape" });
+  dibujarEtiqueta(doc, d, cfg, logo, fecha, true);
+  return doc;
+}
+
+/* ---------------- Envío ---------------- */
+class ErrorEnvio extends Error {
+  constructor(causa, accion){ super(causa); this.causa = causa; this.accion = accion; }
+}
+
+async function postear(payload){
+  if (!configurado(URL_WEBAPP))
+    throw new ErrorEnvio("El formulario no tiene configurada la dirección del servidor (URL_WEBAPP).", "Avísale a la tienda por WhatsApp que el formulario no está funcionando.");
+  if (!navigator.onLine)
+    throw new ErrorEnvio("Tu teléfono no tiene conexión a internet en este momento.", "Revisa tus datos móviles o el Wi-Fi y vuelve a tocar «Enviar pedido». Lo que escribiste sigue aquí.");
+  const ctrl = new AbortController();
+  const reloj = setTimeout(() => ctrl.abort(), TIEMPO_MAX_ENVIO_MS);
+  let resp;
+  try {
+    resp = await fetch(URL_WEBAPP, { method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" },
+                                     body: JSON.stringify(payload), signal: ctrl.signal });
+  } catch(e){
+    if (e.name === "AbortError")
+      throw new ErrorEnvio("El servidor tardó demasiado en responder y no pudimos confirmar el envío.", "Vuelve a tocar «Enviar pedido». Si tu pedido sí había llegado, no se duplicará.");
+    throw new ErrorEnvio("No se pudo conectar con el servidor de la tienda.", "Revisa tu conexión a internet y vuelve a tocar «Enviar pedido».");
+  } finally { clearTimeout(reloj); }
+
+  if (!resp.ok) throw new ErrorEnvio("El servidor respondió con un error (código " + resp.status + ").", "Espera un minuto y vuelve a intentar. Si se repite, avísale a la tienda por WhatsApp.");
+  let json;
+  try { json = await resp.json(); }
+  catch(e){ throw new ErrorEnvio("El servidor dio una respuesta que no se pudo leer.", "Vuelve a intentar en un momento. Si se repite, avísale a la tienda por WhatsApp."); }
+  if (!json || json.ok !== true)
+    throw new ErrorEnvio("El servidor no pudo registrar el pedido: " + ((json && json.error) || "motivo desconocido") + ".", "Vuelve a intentar. Si el problema sigue, avísale a la tienda por WhatsApp.");
+  return json;
+}
+
+async function enviar(ev){
+  ev.preventDefault();
+  if (enviando) return;                       // candado contra doble clic
+  const btn = $("btnEnviar");
+
+  const errores = validar();
+  if (errores.length){
+    await modal({ tipo:"aviso", titulo: errores.length === 1 ? "Falta corregir 1 dato" : `Faltan corregir ${errores.length} datos`,
+      html: "<p>Tu pedido todavía no se ha enviado. Revisa:</p><ul>" +
+            errores.map(([id, m]) => `<li><b>${esc(ETIQUETAS[id])}:</b> ${esc(m)}</li>`).join("") + "</ul>",
+      boton:"Revisar" });
+    const primero = $(errores[0][0]);
+    const foco = primero.matches("input,select,textarea") ? primero : primero.querySelector("input");
+    primero.scrollIntoView({ behavior:"smooth", block:"center" });
+    if (foco) setTimeout(() => foco.focus({ preventScroll:true }), 350);
+    return;
+  }
+
+  enviando = true;
+  ocupado(btn, true, "Preparando etiquetas…");
+  try {
+    if (!window.jspdf) throw new ErrorEnvio("No se pudo cargar el generador de etiquetas.", "Revisa tu conexión, recarga la página y vuelve a enviar.");
+    if (!intento) intento = { id: nuevoId(), sello: selloCaracas() };
+    const datos = recolectar();
+    const secs = secciones(datos);
+    const logo = await obtenerLogoMono();
+    const hp = $("sitioWeb").value;
+
+    const archivos = [58, 80].map(p => {
+      const doc = generarEtiqueta(datos, p, logo, intento.sello.legible);
+      return { nombre: nombreArchivo(datos.nombre, intento.sello, p), doc };
+    });
+
+    const mensaje = mensajeWhatsApp(secs, intento.sello.legible);
+
+    if (MODO_PRUEBA){
+      archivos.forEach(a => a.doc.save(a.nombre));
+    } else {
+      ocupado(btn, true, "Enviando pedido…");
+      await postear({
+        idPedido: intento.id, hp, fecha: intento.sello.legible, datos, secciones: secs,
+        archivos: archivos.map(a => ({ nombre: a.nombre, base64: a.doc.output("datauristring").split("base64,")[1] }))
+      });
+    }
+    intento = null;
+    mostrarPasoFinal({ nombre: datos.nombre, mensaje });
+  } catch(e){
+    enviando = false;
+    ocupado(btn, false, "Enviar pedido");
+    const causa = e instanceof ErrorEnvio ? e.causa : "Ocurrió un error inesperado al preparar tu pedido (" + (e && e.message || e) + ").";
+    const accion = e instanceof ErrorEnvio ? e.accion : "Recarga la página y vuelve a intentar. Si se repite, avísale a la tienda por WhatsApp.";
+    await modal({ tipo:"error", titulo:"Tu pedido NO se envió",
+      html: `<p>${esc(causa)}</p><p><b>Qué hacer:</b> ${esc(accion)}</p>`, boton:"Entendido" });
+  } finally {
+    enviando = false;
+    ocupado(btn, false, "Enviar pedido");
+  }
+}
+
+/* ---------------- Paso final obligatorio ---------------- */
+function alSalir(e){ e.preventDefault(); e.returnValue = ""; return ""; }
+function avisoAlSalir(activo){
+  window.removeEventListener("beforeunload", alSalir);
+  if (activo) window.addEventListener("beforeunload", alSalir);
+}
+function guardarPendiente(info){ try { localStorage.setItem(CLAVE_PENDIENTE, JSON.stringify(info)); } catch(e){} }
+function leerPendiente(){ try { return JSON.parse(localStorage.getItem(CLAVE_PENDIENTE) || "null"); } catch(e){ return null; } }
+function borrarPendiente(){ try { localStorage.removeItem(CLAVE_PENDIENTE); } catch(e){} }
+
+function mostrarPasoFinal(info){
+  form.hidden = true;
+  $("pasoFinal").hidden = false;
+  $("gracias").hidden = true;
+  $("heroTitulo").textContent = "Casi listo";
+  $("heroTexto").textContent = "Tus datos llegaron. Solo falta avisar por WhatsApp.";
+  $("resumenPedido").textContent = info.mensaje;
+  $("graciasNombre").textContent = info.nombre.split(" ")[0];
+  const wa = $("btnWhatsApp");
+  wa.href = "https://wa.me/" + WHATSAPP_TIENDA + "?text=" + encodeURIComponent(info.mensaje);
+  wa.querySelector(".txt").textContent = "Enviar aviso por WhatsApp";
+  guardarPendiente(info);
+  avisoAlSalir(true);
+  window.scrollTo(0, 0);
+  if (!configurado(WHATSAPP_TIENDA))
+    modal({ tipo:"error", titulo:"Falta configurar WhatsApp", html:"<p>El número de WhatsApp de la tienda (WHATSAPP_TIENDA) no está configurado, así que el botón no abrirá el chat.</p>" });
+}
+
+function alTocarWhatsApp(e){
+  if (!configurado(WHATSAPP_TIENDA)){ e.preventDefault(); return; }
+  avisoAlSalir(false);
+  borrarPendiente();
+  $("gracias").hidden = false;
+  this.querySelector(".txt").textContent = "Abrir WhatsApp otra vez";
+}
+
+function nuevoPedido(){
+  form.reset();
+  limpiarErrores();
+  $("bloqueMaracay").hidden = true; $("bloqueNacional").hidden = true;
+  intento = null;
+  $("pasoFinal").hidden = true;
+  form.hidden = false;
+  $("heroTitulo").textContent = "Datos para tu envío";
+  $("heroTexto").textContent = "Completa este formulario para recibir tu compra: entrega directa en Maracay o envío por agencia a toda Venezuela.";
+  window.scrollTo(0, 0);
+}
+
+/* ---------------- Arranque ---------------- */
+(function iniciar(){
+  $("bannerPrueba").hidden = !MODO_PRUEBA;
+
+  const logo = $("logoHeader");
+  logo.src = LOGO_WEB;
+  logo.addEventListener("error", () => { logo.hidden = true; $("logoTexto").hidden = false; });
+
+  const sel = $("estado");
+  ESTADOS.forEach(e => sel.add(new Option(e, e)));
+
+  // Ningún input numérico cambia con la rueda del mouse
+  document.addEventListener("wheel", e => {
+    const t = e.target;
+    if (t instanceof HTMLInputElement && t.type === "number" && document.activeElement === t) t.blur();
+  }, { passive:true });
+
+  // Solo dígitos en la cédula
+  $("cedNum").addEventListener("input", e => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 9); });
+
+  // Teléfono: autoformato 04XX-XXXXXXX (acepta que peguen +58 414...)
+  $("telefono").addEventListener("input", e => {
+    let d = e.target.value.replace(/\D/g, "");
+    if (d.startsWith("58") && d.length > 10) d = "0" + d.slice(2);
+    if (d.startsWith("4")) d = "0" + d;
+    d = d.slice(0, 11);
+    e.target.value = d.length > 4 ? d.slice(0, 4) + "-" + d.slice(4) : d;
+  });
+
+  // Campos que cambian según la modalidad (Maracay / Nacional)
+  const actualizarEntrega = () => {
+    const m = radio("modalidad");
+    $("bloqueMaracay").hidden = m !== "maracay";
+    $("bloqueNacional").hidden = m !== "nacional";
+    const ag = radio("agencia");
+    $("ayudaOficina").textContent = "Dirección de la oficina de " + (ag || "la agencia") + " donde vas a retirar.";
+  };
+  form.querySelectorAll('input[name="modalidad"],input[name="agencia"]').forEach(r => r.addEventListener("change", actualizarEntrega));
+
+  // Cualquier cambio en el formulario: quita el error de ese campo y crea un envío nuevo
+  const alEditar = e => {
+    const c = e.target.closest(".campo"); if (c) c.classList.remove("invalido");
+    intento = null;
+  };
+  form.addEventListener("input", alEditar);
+  form.addEventListener("change", alEditar);
+
+  form.addEventListener("submit", enviar);
+  $("btnWhatsApp").addEventListener("click", alTocarWhatsApp);
+  $("btnNuevo").addEventListener("click", nuevoPedido);
+
+  // Si recargó o volvió sin haber avisado por WhatsApp, se le muestra otra vez el paso final
+  const pendiente = leerPendiente();
+  if (pendiente && pendiente.mensaje) mostrarPasoFinal(pendiente);
+})();
+</script>
+</body>
+</html>
