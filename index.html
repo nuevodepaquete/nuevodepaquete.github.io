@@ -609,7 +609,7 @@ function dibujarEtiqueta(doc, d, cfg, logo, fecha, pintar){
   if (logo){
     let lw = cfg.logoAncho, lh = lw * logo.h / logo.w;
     if (lh > cfg.logoAltoMax){ lh = cfg.logoAltoMax; lw = lh * logo.w / logo.h; }
-    if (pintar) doc.addImage(logo.dataUrl, "PNG", (cfg.ancho - lw) / 2, y, lw, lh);
+    if (pintar) doc.addImage(logo.dataUrl, "PNG", (cfg.ancho - lw) / 2, y, lw, lh, undefined, "FAST");
     y += lh + 1.5;
   } else {
     texto(TIENDA, cfg.grande - 2, "bold", true);
